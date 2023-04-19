@@ -2,6 +2,7 @@ import re
 
 pattern = r'^(?P<protocol>[^:]+)://(?P<host>[^/:]+)(?::(?P<port>\d+))?(?P<path>[^?]*)(?:\?(?P<query>.+))?$'
 
+
 class URL:
 
     def __init__(self, url) -> None:

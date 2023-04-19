@@ -31,6 +31,20 @@ class Request:
                 return self._send_https()
         return self.response
 
+    @staticmethod
+    def _recv_response(sock) -> bytes:
+        buffer = b""
+        sock.settimeout(2)
+        while True:
+            try:
+                chunk = sock.recv(4096)
+                if chunk is None:
+                    break
+                buffer += chunk
+            except socket.timeout:
+                break
+        return buffer
+
     def _send_http(self) -> Response:
         pass
 
@@ -44,16 +58,7 @@ class Request:
                     self.url.path, self.url.host
                 )
                 s_sock.sendall(request.encode())
-                s_sock.settimeout(2)
-                buffer = b""
-                while True:
-                    try:
-                        chunk = s_sock.recv(4096)
-                        if chunk is None:
-                            break
-                        buffer += chunk
-                    except socket.timeout:
-                        break
+                buffer = self._recv_response(s_sock)
                 self.response = Response(buffer)
             except ssl.SSLError as e:
                 logging.error(f"SSL error: {e}")
