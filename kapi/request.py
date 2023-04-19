@@ -34,7 +34,7 @@ class Request:
     @staticmethod
     def _recv_response(sock) -> bytes:
         buffer = b""
-        sock.settimeout(2)
+        sock.settimeout(0.5)
         while True:
             try:
                 chunk = sock.recv(4096)
@@ -60,6 +60,9 @@ class Request:
                 s_sock.sendall(request.encode())
                 buffer = self._recv_response(s_sock)
                 self.response = Response(buffer)
+                if self.response.status_code == 302:
+                    r = Request(url=self.response.headers['Location'])
+                    return r.send()
             except ssl.SSLError as e:
                 logging.error(f"SSL error: {e}")
             except socket.error as e:
